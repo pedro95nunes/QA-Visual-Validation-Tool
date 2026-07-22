@@ -1,0 +1,27 @@
+{
+  "name": "atlas-visual",
+  "version": "0.1.0",
+  "description": "Visual validation platform foundation for QA teams.",
+  "license": "MIT",
+  "private": false,
+  "type": "commonjs",
+  "main": "dist/src/index.js",
+  "bin": {
+    "atlas": "dist/src/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/index.js",
+    "validate": "npm run build && node dist/src/index.js validate",
+    "test": "npm run build && node --test dist/tests/**/*.test.js"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3"
+  }
+}
