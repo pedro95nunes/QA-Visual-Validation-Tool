@@ -11,13 +11,13 @@ export function createCli(applicationProvider: ApplicationProvider, logger: Logg
   const program = new Command();
 
   program.name(ApplicationMetadata.name).description(ApplicationMetadata.description);
-  program.command("validate").description("Start a validation execution").action(() => {
+  program.command("validate").description("Start a validation execution").action(async () => {
     logger.info(DIVIDER);
     logger.info(ApplicationMetadata.description);
     logger.info(VALIDATION_START_MESSAGE);
     logger.info(DIVIDER);
 
-    applicationProvider.createValidationEngine().execute();
+    await applicationProvider.createValidationEngine().execute();
   });
 
   program.command("version").description("Display the application version").action(() => {
