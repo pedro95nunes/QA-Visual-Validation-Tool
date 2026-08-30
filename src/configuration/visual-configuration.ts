@@ -1,5 +1,9 @@
-/** Visual-validation settings reserved for a future capability. */
+import { ComparisonConfiguration } from "./comparison-configuration";
+import { VisualValidationPageConfiguration } from "./visual-validation-page-configuration";
+
+/** Visual comparison settings independent of a concrete comparison engine. */
 export interface VisualConfiguration {
-  baselineDirectory: string;
-  threshold: number;
+  enabled: boolean;
+  pages: VisualValidationPageConfiguration[];
+  comparison: ComparisonConfiguration;
 }

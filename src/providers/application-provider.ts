@@ -1,14 +1,13 @@
 import { ApplicationConfiguration } from "../configuration/application-configuration";
-import { DesignProviderType } from "../configuration/design-configuration";
-import { ConfigurationException } from "../core/exceptions/configuration.exception";
+import { DefaultComparatorFactory } from "../infrastructure/comparator/default-comparator-factory";
 import { ValidationEngine } from "../engine/validation-engine";
-import { ReferenceService } from "../engine/reference-service";
-import { DesignProvider } from "../core/interfaces/design-provider";
+import { ValidationPluginRegistry } from "../engine/validation-plugin-registry";
 import { DefaultBrowserFactory } from "../infrastructure/browser/default-browser-factory";
-import { FigmaProvider } from "../infrastructure/design/figma-provider";
+import { DefaultReferenceServiceFactory } from "../infrastructure/design/default-reference-service-factory";
 import { ConsoleLogger } from "../infrastructure/logging/console-logger";
 import { DefaultScreenshotServiceFactory } from "../infrastructure/screenshot/default-screenshot-service-factory";
 import { LocalFileStorage } from "../infrastructure/storage/local-file-storage";
+import { VisualValidationPlugin } from "../plugins/visual-validation-plugin";
 
 /** Composition root that wires concrete infrastructure into the application. */
 export class ApplicationProvider {
@@ -19,16 +18,22 @@ export class ApplicationProvider {
     const browserFactory = new DefaultBrowserFactory(this.configuration.browser);
     const storage = new LocalFileStorage();
     const screenshotServiceFactory = new DefaultScreenshotServiceFactory(storage, this.configuration.evidence);
-    const referenceService = new ReferenceService(this.createDesignProvider(), storage, this.configuration.reference);
-    return new ValidationEngine(logger, browserFactory, screenshotServiceFactory, referenceService, this.configuration);
-  }
-
-  private createDesignProvider(): DesignProvider {
-    switch (this.configuration.design.provider) {
-      case DesignProviderType.Figma:
-        return new FigmaProvider(this.configuration.figma);
-      default:
-        throw new ConfigurationException(`Unsupported design provider: ${this.configuration.design.provider}.`);
-    }
+    const comparator = new DefaultComparatorFactory(storage, this.configuration.visual.comparison).create();
+    const referenceServiceFactory = new DefaultReferenceServiceFactory(
+      storage,
+      this.configuration.figma,
+      this.configuration.reference
+    );
+    const visualValidationPlugin = new VisualValidationPlugin(
+      logger,
+      browserFactory,
+      screenshotServiceFactory,
+      referenceServiceFactory,
+      comparator,
+      this.configuration.visual.enabled ? this.configuration.visual.pages : [],
+      this.configuration.visual.comparison
+    );
+    const pluginRegistry = new ValidationPluginRegistry([visualValidationPlugin]);
+    return new ValidationEngine(logger, pluginRegistry, this.configuration.plugins.enabled);
   }
 }

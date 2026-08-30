@@ -1,40 +1,27 @@
-import { ApplicationConfiguration } from "../configuration/application-configuration";
+import { randomUUID } from "node:crypto";
 import { ValidationException } from "../core/exceptions/validation.exception";
-import { BrowserFactory } from "../core/interfaces/browser-factory";
 import { Logger } from "../core/interfaces/logger";
-import { ReferenceService } from "../core/interfaces/reference-service";
-import { ScreenshotServiceFactory } from "../core/interfaces/screenshot-service-factory";
-import { ExecutionStatus } from "../core/models/execution-status";
+import { ValidationPluginRegistry } from "../core/interfaces/validation-plugin-registry";
+import { ValidationExecutionResult } from "../core/models/validation-execution-result";
 
-/** Coordinates the current validation application flow. */
+/** Resolves configured plugins and aggregates their generic validation results. */
 export class ValidationEngine {
   public constructor(
     private readonly logger: Logger,
-    private readonly browserFactory: BrowserFactory,
-    private readonly screenshotServiceFactory: ScreenshotServiceFactory,
-    private readonly referenceService: ReferenceService,
-    private readonly configuration: ApplicationConfiguration
+    private readonly pluginRegistry: ValidationPluginRegistry,
+    private readonly enabledPluginIds: string[]
   ) {}
 
-  public async execute(): Promise<ExecutionStatus> {
+  public async execute(): Promise<ValidationExecutionResult[]> {
     this.logger.info("Validation started.");
-    const browser = this.browserFactory.create();
 
     try {
-      await browser.launch();
-      this.logger.info("Browser initialized.");
-      this.logger.info("Opening page.");
-      await browser.open(this.configuration.browser.url);
-      this.logger.info("Page loaded successfully.");
-      this.logger.info("Capturing screenshot.");
-      const screenshotService = this.screenshotServiceFactory.create(browser);
-      const evidence = await screenshotService.capture();
-      this.logger.info(`Evidence captured: ${evidence.filePath}`);
-      this.logger.info("Downloading reference.");
-      const reference = await this.referenceService.retrieve();
-      this.logger.info("Reference downloaded.");
-      this.logger.info(`Reference stored: ${reference.localPath}`);
-      return ExecutionStatus.Succeeded;
+      const context = { executionId: randomUUID() };
+      const results = await Promise.all(
+        this.enabledPluginIds.map((pluginId) => this.pluginRegistry.resolve(pluginId).execute(context))
+      );
+      this.logAggregateResults(results);
+      return results;
     } catch (error) {
       if (error instanceof ValidationException) {
         throw error;
@@ -42,9 +29,15 @@ export class ValidationEngine {
 
       throw new ValidationException("Validation execution failed.", toError(error));
     } finally {
-      this.logger.info("Closing browser.");
-      await browser.close();
       this.logger.info("Validation finished.");
+    }
+  }
+
+  private logAggregateResults(results: ValidationExecutionResult[]): void {
+    for (const result of results) {
+      this.logger.info(
+        `${result.pluginId}: ${result.status} (${result.passed}/${result.total} passed, ${result.failed} failed, ${result.errors} errors).`
+      );
     }
   }
 }

@@ -12,7 +12,10 @@ export class DefaultScreenshotServiceFactory implements ScreenshotServiceFactory
     private readonly configuration: EvidenceConfiguration
   ) {}
 
-  public create(browser: Browser): ScreenshotService {
-    return new PlaywrightScreenshotService(browser, this.storage, this.configuration);
+  public create(browser: Browser, name?: string): ScreenshotService {
+    return new PlaywrightScreenshotService(browser, this.storage, {
+      ...this.configuration,
+      name: name ?? this.configuration.name
+    });
   }
 }
