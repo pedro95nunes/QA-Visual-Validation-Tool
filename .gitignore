@@ -11,3 +11,6 @@ artifacts/
 
 # Local machine files (e.g. a personal SSH config that must never be committed)
 config
+
+# Local working config (users create their own; not part of the tool)
+/atlas.config.yaml
