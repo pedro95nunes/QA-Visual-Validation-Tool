@@ -5,5 +5,5 @@ export enum ComparisonStatus {
   IncompatibleDimensions = "INCOMPATIBLE_DIMENSIONS",
   InvalidReference = "INVALID_REFERENCE",
   InvalidEvidence = "INVALID_EVIDENCE",
-  Error = "ERROR"
+  Error = "ERROR",
 }

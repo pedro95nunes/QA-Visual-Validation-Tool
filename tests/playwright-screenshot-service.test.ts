@@ -29,13 +29,17 @@ class MemoryStorage implements Storage {
     this.content = content;
     return filePath;
   }
+
+  public async read(): Promise<Uint8Array> {
+    return this.content ?? new Uint8Array();
+  }
 }
 
 const evidenceConfiguration: EvidenceConfiguration = {
   outputDirectory: "artifacts",
   fullPage: true,
   imageFormat: ScreenshotFormat.Png,
-  name: "homepage"
+  name: "homepage",
 };
 
 test("captures and stores evidence through generic browser and storage boundaries", async () => {

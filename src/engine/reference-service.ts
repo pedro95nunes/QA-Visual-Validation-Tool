@@ -20,10 +20,7 @@ export class ReferenceService implements ReferenceServiceContract {
       const downloadedReference = await this.designProvider.downloadReference();
       const id = randomUUID();
       const imageFormat = downloadedReference.metadata.imageFormat;
-      const localPath = join(
-        this.configuration.outputDirectory,
-        `${downloadedReference.name}-${id}.${imageFormat}`
-      );
+      const localPath = join(this.configuration.outputDirectory, `${downloadedReference.name}-${id}.${imageFormat}`);
       const storedPath = await this.storage.save(localPath, downloadedReference.content);
 
       return {
@@ -34,7 +31,7 @@ export class ReferenceService implements ReferenceServiceContract {
         downloadedAt: new Date(),
         width: downloadedReference.width,
         height: downloadedReference.height,
-        metadata: downloadedReference.metadata
+        metadata: downloadedReference.metadata,
       };
     } catch (error) {
       if (error instanceof ReferenceDownloadException) {

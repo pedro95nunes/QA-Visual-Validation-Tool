@@ -3,3 +3,11 @@ dist/
 coverage/
 artifacts/
 .DS_Store
+*.log
+.env
+.env.*
+# Keep the committed template (docs reference it); ignore real local env files only.
+!.env.example
+
+# Local machine files (e.g. a personal SSH config that must never be committed)
+config

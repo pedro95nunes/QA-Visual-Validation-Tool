@@ -1,6 +1,6 @@
 {
   "name": "atlas-visual",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Visual validation platform foundation for QA teams.",
   "license": "MIT",
   "private": false,
@@ -9,11 +9,22 @@
   "bin": {
     "atlas": "dist/src/index.js"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/src/index.js",
     "validate": "npm run build && node dist/src/index.js validate",
-    "test": "npm run build && node --test dist/tests/**/*.test.js"
+    "test": "npm run build && node --test dist/tests/**/*.test.js",
+    "test:unit": "npm run build && node --test $(find dist/tests -maxdepth 1 -name '*.test.js' ! -name '*.integration.test.js' | sort | tr '\\n' ' ')",
+    "test:integration": "npm run build && ATLAS_RUN_INTEGRATION=true node --test dist/tests/**/*.integration.test.js",
+    "test:e2e": "npm run build && ATLAS_RUN_INTEGRATION=true node --test dist/tests/visual-validation.integration.test.js",
+    "test:coverage": "npm run build && ATLAS_RUN_INTEGRATION=true c8 node --test dist/tests/**/*.test.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/ tests/",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "commander": "^13.1.0",
@@ -23,10 +34,14 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
+    "@types/node": "^22.20.1",
     "@types/pixelmatch": "^5.2.6",
     "@types/pngjs": "^6.0.5",
-    "@types/node": "^22.20.1",
+    "c8": "^12.0.0",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
     "tsx": "^4.23.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.69.0"
   }
 }

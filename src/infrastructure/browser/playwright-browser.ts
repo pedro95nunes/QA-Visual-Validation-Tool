@@ -48,7 +48,7 @@ export class PlaywrightBrowser implements Browser {
     try {
       return await this.page.screenshot({
         fullPage: options.fullPage,
-        type: toPlaywrightScreenshotType(options.format)
+        type: toPlaywrightScreenshotType(options.format),
       });
     } catch (error) {
       throw new ScreenshotException("Unable to capture a screenshot.", toError(error));

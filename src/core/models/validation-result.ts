@@ -7,6 +7,8 @@ import { ValidationFailureKind } from "./validation-failure-kind";
 /** Technology-independent result of validating a single target. */
 export interface ValidationResult {
   pageId: string;
+  /** The validated target location, when known. */
+  url?: string;
   status: ValidationStatus;
   failureKind?: ValidationFailureKind;
   comparison?: ComparisonResult;

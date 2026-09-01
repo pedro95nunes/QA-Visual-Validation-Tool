@@ -57,7 +57,10 @@ export class VisualValidationPlugin implements ValidationPlugin {
     return aggregateResults(this.id, results, performance.now() - startedAt);
   }
 
-  private async validatePage(browser: ReturnType<BrowserFactory["create"]>, page: VisualValidationPageConfiguration): Promise<ValidationResult> {
+  private async validatePage(
+    browser: ReturnType<BrowserFactory["create"]>,
+    page: VisualValidationPageConfiguration
+  ): Promise<ValidationResult> {
     const startedAt = performance.now();
     this.logger.info(`Page: ${page.id}`);
 
@@ -82,6 +85,7 @@ export class VisualValidationPlugin implements ValidationPlugin {
 
       return {
         pageId: page.id,
+        url: page.url,
         status,
         comparison,
         evidence,
@@ -91,20 +95,22 @@ export class VisualValidationPlugin implements ValidationPlugin {
         metrics: {
           differencePercentage: comparison.differencePercentage,
           differentPixels: comparison.differentPixels,
-          totalPixels: comparison.totalPixels
-        }
+          totalPixels: comparison.totalPixels,
+        },
       };
     } catch (error) {
       this.logger.error(`Page ${page.id} failed: ${toSafeMessage(error)}`);
       return {
         pageId: page.id,
+        url: page.url,
         status: ValidationStatus.Error,
-        failureKind: error instanceof ConfigurationException
-          ? ValidationFailureKind.Configuration
-          : ValidationFailureKind.Execution,
+        failureKind:
+          error instanceof ConfigurationException
+            ? ValidationFailureKind.Configuration
+            : ValidationFailureKind.Execution,
         duration: performance.now() - startedAt,
         findings: [toSafeMessage(error)],
-        metrics: {}
+        metrics: {},
       };
     }
   }
@@ -118,7 +124,7 @@ export class VisualValidationPlugin implements ValidationPlugin {
       pageId: page.id,
       url: page.url,
       reference: page.reference,
-      comparison: toComparisonOptions(comparison)
+      comparison: toComparisonOptions(comparison),
     };
   }
 
@@ -128,7 +134,7 @@ export class VisualValidationPlugin implements ValidationPlugin {
       status: ValidationStatus.Error,
       duration: 0,
       findings: [toSafeMessage(error)],
-      metrics: {}
+      metrics: {},
     };
   }
 }
@@ -138,16 +144,19 @@ function toComparisonOptions(configuration: ComparisonConfiguration): Comparison
     pixelThreshold: configuration.pixelThreshold,
     allowedDifferencePercentage: configuration.allowedDifferencePercentage,
     includeAA: configuration.includeAA,
-    alpha: configuration.alpha
+    alpha: configuration.alpha,
   };
 }
 
 function validatePageConfiguration(page: VisualValidationPageConfiguration): void {
   if (!page.id.trim()) throw new ConfigurationException("Visual validation page id is required.");
   if (!page.url.trim()) throw new ConfigurationException(`Visual validation page '${page.id}' requires a URL.`);
-  if (!page.reference?.provider) throw new ConfigurationException(`Visual validation page '${page.id}' requires a reference provider.`);
-  if (!page.reference.fileKey.trim()) throw new ConfigurationException(`Visual validation page '${page.id}' requires a Figma fileKey.`);
-  if (!page.reference.nodeId.trim()) throw new ConfigurationException(`Visual validation page '${page.id}' requires a Figma nodeId.`);
+  if (!page.reference?.provider)
+    throw new ConfigurationException(`Visual validation page '${page.id}' requires a reference provider.`);
+  if (!page.reference.fileKey.trim())
+    throw new ConfigurationException(`Visual validation page '${page.id}' requires a Figma fileKey.`);
+  if (!page.reference.nodeId.trim())
+    throw new ConfigurationException(`Visual validation page '${page.id}' requires a Figma nodeId.`);
 }
 
 function validateComparisonConfiguration(configuration: ComparisonConfiguration): void {
@@ -174,7 +183,7 @@ function aggregateResults(pluginId: string, results: ValidationResult[], duratio
     passed,
     failed,
     errors,
-    duration
+    duration,
   };
 }
 

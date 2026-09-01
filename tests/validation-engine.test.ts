@@ -10,7 +10,9 @@ import { ValidationPluginRegistry } from "../src/engine/validation-plugin-regist
 
 class TestLogger implements Logger {
   public readonly messages: string[] = [];
-  public info(message: string): void { this.messages.push(message); }
+  public info(message: string): void {
+    this.messages.push(message);
+  }
   public error(_message: string): void {}
 }
 
@@ -20,7 +22,16 @@ class FakePlugin implements ValidationPlugin {
   public executed = false;
   public async execute(_context: ValidationContext): Promise<ValidationExecutionResult> {
     this.executed = true;
-    return { pluginId: this.id, status: ValidationStatus.Passed, results: [], total: 0, passed: 0, failed: 0, errors: 0, duration: 1 };
+    return {
+      pluginId: this.id,
+      status: ValidationStatus.Passed,
+      results: [],
+      total: 0,
+      passed: 0,
+      failed: 0,
+      errors: 0,
+      duration: 1,
+    };
   }
 }
 

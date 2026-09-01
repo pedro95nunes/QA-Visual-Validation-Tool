@@ -1,0 +1,9 @@
+{
+  "all": true,
+  "src": ["dist/src"],
+  "include": ["dist/src/**/*.js"],
+  "exclude": ["dist/src/index.js", "**/*.d.ts"],
+  "reporter": ["text-summary", "html", "lcov"],
+  "reports-dir": "coverage",
+  "check-coverage": false
+}

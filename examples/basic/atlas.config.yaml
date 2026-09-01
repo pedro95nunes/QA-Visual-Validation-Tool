@@ -1,0 +1,64 @@
+# Atlas Visual — Basic Example Configuration
+#
+# 1. Copy this file to your project root as atlas.config.yaml
+# 2. Set the required environment variables (see below)
+# 3. Run: atlas doctor
+# 4. Run: atlas validate
+#
+# Required environment variables:
+#   FIGMA_TOKEN    — your Figma personal access token
+#   FIGMA_FILE_KEY — the key from your Figma file URL (figma.com/design/<KEY>/...)
+#   FIGMA_NODE_ID  — the node ID of the frame to use as a reference
+
+project:
+  name: My Website
+
+# Named environment — used by action policies (e.g. only run Qase on staging)
+environment: local
+
+browser:
+  provider: playwright
+  headless: true
+  timeout: 30000
+  viewport:
+    width: 1440
+    height: 900
+
+visual:
+  enabled: true
+  pages:
+    - id: homepage
+      url: https://example.com
+      reference:
+        provider: figma
+        fileKey: ${FIGMA_FILE_KEY}
+        nodeId: ${FIGMA_NODE_ID}
+      comparison:
+        pixelThreshold: 0.1
+        allowedDifferencePercentage: 1.0
+
+    # Add more pages as needed:
+    # - id: about
+    #   url: https://example.com/about
+    #   reference:
+    #     provider: figma
+    #     fileKey: ${FIGMA_FILE_KEY}
+    #     nodeId: "456:789"
+
+report:
+  enabled: true
+  outputDirectory: artifacts
+  html:
+    enabled: true
+  json:
+    enabled: true
+
+actions:
+  qase:
+    enabled: false
+    onlyOnFailure: true
+    environments:
+      - staging
+      - production
+  slack:
+    enabled: false
