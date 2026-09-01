@@ -39,9 +39,12 @@ npm run build
 atlas init
 
 # 2. Set your Figma credentials
+#    Either export them in your shell:
 export FIGMA_TOKEN="your-figma-token"
 export FIGMA_FILE_KEY="your-file-key"
 export FIGMA_NODE_ID="your-node-id"
+#    …or copy .env.example to .env and fill it in — Atlas auto-loads .env at startup:
+#    cp .env.example .env
 
 # 3. Verify the environment
 atlas doctor
@@ -318,6 +321,10 @@ When both `.yaml` and `.yml` exist, `.yaml` takes precedence. Atlas will not sil
 | `FIGMA_TOKEN`    | Figma personal access token    | Yes         |
 | `FIGMA_FILE_KEY` | Figma file key (from file URL) | Yes         |
 | `FIGMA_NODE_ID`  | Default Figma node ID          | Recommended |
+
+Atlas auto-loads a `.env` file from the working directory at startup (via `dotenv`). Variables
+already present in the environment (exported in your shell or injected by CI secrets) take
+precedence over the `.env` file, so CI never depends on a committed `.env`.
 
 Secrets are **never** written to logs, reports, or doctor output. The doctor confirms a token is set without printing its value.
 
