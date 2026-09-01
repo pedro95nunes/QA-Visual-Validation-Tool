@@ -23,12 +23,16 @@ export class FigmaProvider implements DesignProvider {
   public async downloadReference(): Promise<DownloadedReference> {
     this.validateConfiguration();
 
+    const nodeId = normalizeFigmaNodeId(this.configuration.nodeId);
+
     try {
-      const imageUrl = await this.getImageUrl();
+      const imageUrl = await this.getImageUrl(nodeId);
       const imageResponse = await this.fetcher(imageUrl);
 
       if (!imageResponse.ok) {
-        throw new ReferenceDownloadException("Figma returned an unsuccessful response for the reference image.");
+        throw new ReferenceDownloadException(
+          `Figma image download failed with HTTP ${imageResponse.status} (${imageResponse.statusText || "no status text"}).`
+        );
       }
 
       const content = new Uint8Array(await imageResponse.arrayBuffer());
@@ -42,7 +46,7 @@ export class FigmaProvider implements DesignProvider {
         height: dimensions.height,
         metadata: {
           fileKey: this.configuration.fileKey,
-          nodeId: this.configuration.nodeId,
+          nodeId,
           imageFormat: this.configuration.imageFormat,
         },
       };
@@ -61,7 +65,10 @@ export class FigmaProvider implements DesignProvider {
     try {
       const response = await this.fetcher(`${FIGMA_API_URL}/me`, { headers: this.authenticationHeaders() });
       if (!response.ok) {
-        throw new ReferenceProviderException("Figma health check was unsuccessful.");
+        const detail = await describeFigmaError(response);
+        throw new ReferenceProviderException(
+          `Figma health check failed with HTTP ${response.status}${detail ? `: ${detail}` : ""}.`
+        );
       }
     } catch (error) {
       if (error instanceof ReferenceProviderException) {
@@ -72,20 +79,27 @@ export class FigmaProvider implements DesignProvider {
     }
   }
 
-  private async getImageUrl(): Promise<string> {
+  private async getImageUrl(nodeId: string): Promise<string> {
     const requestUrl = new URL(`${FIGMA_API_URL}/images/${this.configuration.fileKey}`);
-    requestUrl.searchParams.set("ids", this.configuration.nodeId);
+    requestUrl.searchParams.set("ids", nodeId);
     requestUrl.searchParams.set("format", toFigmaImageFormat(this.configuration.imageFormat));
     const response = await this.fetcher(requestUrl.toString(), { headers: this.authenticationHeaders() });
 
     if (!response.ok) {
-      throw new ReferenceDownloadException("Figma returned an unsuccessful response for the requested frame.");
+      const detail = await describeFigmaError(response);
+      throw new ReferenceDownloadException(
+        `Figma returned HTTP ${response.status} for the requested frame${detail ? `: ${detail}` : ""}.`
+      );
     }
 
     const body: unknown = await response.json();
-    const imageUrl = getImageUrl(body, this.configuration.nodeId);
+    const imageUrl = getImageUrl(body, nodeId);
     if (!imageUrl) {
-      throw new ReferenceDownloadException("Figma did not return an image for the configured frame.");
+      throw new ReferenceDownloadException(
+        `Figma did not return an image for node "${nodeId}". ` +
+          `Check that FIGMA_NODE_ID uses the "1:23" form (copy a frame link and convert the "-" to ":") ` +
+          `and that the frame exists in file "${this.configuration.fileKey}".`
+      );
     }
 
     return imageUrl;
@@ -101,6 +115,53 @@ export class FigmaProvider implements DesignProvider {
         "Figma configuration requires FIGMA_TOKEN, FIGMA_FILE_KEY, and FIGMA_NODE_ID environment variables."
       );
     }
+  }
+}
+
+/**
+ * Normalizes a Figma node identifier into the `:`-delimited form the REST API returns.
+ *
+ * Accepts the value users most commonly paste by mistake:
+ * - a full link or query string (`…?node-id=2-51&t=abc`) → extracts `node-id`
+ * - a trailing tracking param (`2-51&t=abc`) → drops everything after `&`
+ * - the link's `-` form (`2-51`) → converts to the API's `2:51`
+ * An already-correct `2:51` is returned unchanged.
+ */
+export function normalizeFigmaNodeId(raw: string): string {
+  let value = (raw ?? "").trim();
+
+  const param = value.match(/node-id=([^&\s]+)/i);
+  if (param) {
+    value = param[1];
+  }
+
+  value = value.split("&")[0];
+  value = value.replace(/^(\d+)-(\d+)$/, "$1:$2");
+
+  return value;
+}
+
+/** Extracts a human-readable message from a Figma error response, without leaking secrets. */
+async function describeFigmaError(response: Response): Promise<string> {
+  try {
+    const text = await response.text();
+    if (!text) {
+      return response.statusText ?? "";
+    }
+
+    try {
+      const parsed = JSON.parse(text) as { err?: unknown; message?: unknown };
+      const message = parsed.err ?? parsed.message;
+      if (typeof message === "string" && message.length > 0) {
+        return message;
+      }
+    } catch {
+      // Body was not JSON — fall through to the raw (truncated) text.
+    }
+
+    return text.slice(0, 200);
+  } catch {
+    return response.statusText ?? "";
   }
 }
 
