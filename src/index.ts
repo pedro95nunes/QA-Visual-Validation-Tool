@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
+// IMPORTANT: this side-effect import MUST stay first. It runs dotenv's config()
+// at import time, populating process.env from a local .env BEFORE any other module
+// is evaluated. The default configuration reads process.env.FIGMA_* at module load,
+// so loading .env any later (e.g. inside main()) would be too late. Real environment
+// variables already set in the shell or CI always take precedence over .env.
+import "dotenv/config";
+
 import { createCli } from "./cli/create-cli";
 import { ConsoleLogger } from "./infrastructure/logging/console-logger";
 import { ConfigurationException } from "./core/exceptions/configuration.exception";
