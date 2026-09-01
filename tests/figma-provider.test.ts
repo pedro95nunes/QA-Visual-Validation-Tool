@@ -9,7 +9,7 @@ const configuration: FigmaConfiguration = {
   fileKey: "file-key",
   nodeId: "node-id",
   imageFormat: ScreenshotFormat.Png,
-  name: "homepage"
+  name: "homepage",
 };
 
 test("downloads a Figma frame without exposing its HTTP details", async () => {
@@ -36,14 +36,14 @@ test("downloads a Figma frame without exposing its HTTP details", async () => {
 function jsonResponse(body: unknown): Response {
   return {
     ok: true,
-    json: async () => body
+    json: async () => body,
   } as Response;
 }
 
 function imageResponse(content: Uint8Array): Response {
   return {
     ok: true,
-    arrayBuffer: async () => content.buffer
+    arrayBuffer: async () => content.buffer,
   } as Response;
 }
 

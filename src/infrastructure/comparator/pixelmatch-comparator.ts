@@ -37,16 +37,23 @@ export class PixelmatchComparator implements Comparator {
       return this.finish(evidenceImage.result, startedAt, comparisonOptions);
     }
 
-    if (referenceImage.image.width !== evidenceImage.image.width || referenceImage.image.height !== evidenceImage.image.height) {
-      return this.finish({
-        status: ComparisonStatus.IncompatibleDimensions,
-        width: evidenceImage.image.width,
-        height: evidenceImage.image.height,
-        metadata: {
-          referenceDimensions: `${referenceImage.image.width}x${referenceImage.image.height}`,
-          evidenceDimensions: `${evidenceImage.image.width}x${evidenceImage.image.height}`
-        }
-      }, startedAt, comparisonOptions);
+    if (
+      referenceImage.image.width !== evidenceImage.image.width ||
+      referenceImage.image.height !== evidenceImage.image.height
+    ) {
+      return this.finish(
+        {
+          status: ComparisonStatus.IncompatibleDimensions,
+          width: evidenceImage.image.width,
+          height: evidenceImage.image.height,
+          metadata: {
+            referenceDimensions: `${referenceImage.image.width}x${referenceImage.image.height}`,
+            evidenceDimensions: `${evidenceImage.image.width}x${evidenceImage.image.height}`,
+          },
+        },
+        startedAt,
+        comparisonOptions
+      );
     }
 
     try {
@@ -63,26 +70,32 @@ export class PixelmatchComparator implements Comparator {
       const totalPixels = width * height;
       const differencePercentage = (differentPixels / totalPixels) * 100;
       const passed = differencePercentage <= comparisonOptions.allowedDifferencePercentage;
-      const diffImagePath = differentPixels > 0
-        ? await this.storeDiffImage(diffImage, reference.name)
-        : undefined;
+      const diffImagePath = differentPixels > 0 ? await this.storeDiffImage(diffImage, reference.name) : undefined;
 
-      return this.finish({
-        status: passed ? ComparisonStatus.Passed : ComparisonStatus.Failed,
-        width,
-        height,
-        differentPixels,
-        totalPixels,
-        differencePercentage,
-        passed,
-        diffImage: diffImagePath,
-        metadata: {}
-      }, startedAt, comparisonOptions);
+      return this.finish(
+        {
+          status: passed ? ComparisonStatus.Passed : ComparisonStatus.Failed,
+          width,
+          height,
+          differentPixels,
+          totalPixels,
+          differencePercentage,
+          passed,
+          diffImage: diffImagePath,
+          metadata: {},
+        },
+        startedAt,
+        comparisonOptions
+      );
     } catch (error) {
-      return this.finish({
-        status: ComparisonStatus.Error,
-        metadata: { reason: toSafeErrorReason(error) }
-      }, startedAt, comparisonOptions);
+      return this.finish(
+        {
+          status: ComparisonStatus.Error,
+          metadata: { reason: toSafeErrorReason(error) },
+        },
+        startedAt,
+        comparisonOptions
+      );
     }
   }
 
@@ -108,12 +121,14 @@ export class PixelmatchComparator implements Comparator {
   }
 
   private resolveOptions(options?: ComparisonOptions): ComparisonOptions {
-    return options ?? {
-      pixelThreshold: this.configuration.pixelThreshold,
-      allowedDifferencePercentage: this.configuration.allowedDifferencePercentage,
-      includeAA: this.configuration.includeAA,
-      alpha: this.configuration.alpha
-    };
+    return (
+      options ?? {
+        pixelThreshold: this.configuration.pixelThreshold,
+        allowedDifferencePercentage: this.configuration.allowedDifferencePercentage,
+        includeAA: this.configuration.includeAA,
+        alpha: this.configuration.alpha,
+      }
+    );
   }
 
   private toPixelmatchOptions(options: ComparisonOptions): {
@@ -132,7 +147,7 @@ export class PixelmatchComparator implements Comparator {
     } = {
       threshold: options.pixelThreshold,
       includeAA: options.includeAA,
-      alpha: options.alpha
+      alpha: options.alpha,
     };
 
     if (options.diffColor) {
@@ -163,7 +178,7 @@ export class PixelmatchComparator implements Comparator {
       passed: partialResult.passed ?? false,
       diffImage: partialResult.diffImage,
       metadata: partialResult.metadata ?? {},
-      duration: performance.now() - startedAt
+      duration: performance.now() - startedAt,
     };
   }
 }

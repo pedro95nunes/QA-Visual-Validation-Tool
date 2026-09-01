@@ -9,6 +9,10 @@ class MemoryStorage implements Storage {
   public async save(filePath: string, _content: Uint8Array): Promise<string> {
     return filePath;
   }
+
+  public async read(): Promise<Uint8Array> {
+    return new Uint8Array();
+  }
 }
 
 test("creates the Pixelmatch comparator selected by configuration", () => {
@@ -18,7 +22,7 @@ test("creates the Pixelmatch comparator selected by configuration", () => {
     allowedDifferencePercentage: 1,
     includeAA: false,
     alpha: 0.5,
-    outputDirectory: "artifacts/diffs"
+    outputDirectory: "artifacts/diffs",
   };
 
   const comparator = new DefaultComparatorFactory(new MemoryStorage(), configuration).create();

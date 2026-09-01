@@ -1,6 +1,6 @@
 /** Supported browser providers. */
 export enum BrowserProvider {
-  Playwright = "playwright"
+  Playwright = "playwright",
 }
 
 /** The browser viewport used for a page session. */

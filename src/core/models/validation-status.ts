@@ -2,5 +2,5 @@
 export enum ValidationStatus {
   Passed = "PASSED",
   Failed = "FAILED",
-  Error = "ERROR"
+  Error = "ERROR",
 }

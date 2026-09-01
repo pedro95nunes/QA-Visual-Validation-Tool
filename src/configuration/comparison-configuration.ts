@@ -1,6 +1,6 @@
 /** Supported implementations of the visual comparison boundary. */
 export enum ComparatorProvider {
-  Pixelmatch = "pixelmatch"
+  Pixelmatch = "pixelmatch",
 }
 
 /** Separates per-pixel sensitivity from the accepted result percentage. */

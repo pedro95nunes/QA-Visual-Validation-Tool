@@ -15,7 +15,7 @@ export class DefaultScreenshotServiceFactory implements ScreenshotServiceFactory
   public create(browser: Browser, name?: string): ScreenshotService {
     return new PlaywrightScreenshotService(browser, this.storage, {
       ...this.configuration,
-      name: name ?? this.configuration.name
+      name: name ?? this.configuration.name,
     });
   }
 }

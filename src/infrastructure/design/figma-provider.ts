@@ -43,8 +43,8 @@ export class FigmaProvider implements DesignProvider {
         metadata: {
           fileKey: this.configuration.fileKey,
           nodeId: this.configuration.nodeId,
-          imageFormat: this.configuration.imageFormat
-        }
+          imageFormat: this.configuration.imageFormat,
+        },
       };
     } catch (error) {
       if (error instanceof ReferenceDownloadException || error instanceof InvalidReferenceException) {

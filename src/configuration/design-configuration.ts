@@ -1,6 +1,6 @@
 /** Supported providers for retrieving expected visual references. */
 export enum DesignProviderType {
-  Figma = "figma"
+  Figma = "figma",
 }
 
 /** Selects the provider used to retrieve visual references. */

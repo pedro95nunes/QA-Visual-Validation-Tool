@@ -14,6 +14,6 @@ export function readPngDimensions(content: Uint8Array): { width: number; height:
   const dataView = new DataView(content.buffer, content.byteOffset, content.byteLength);
   return {
     width: dataView.getUint32(16),
-    height: dataView.getUint32(20)
+    height: dataView.getUint32(20),
   };
 }

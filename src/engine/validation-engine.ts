@@ -12,11 +12,11 @@ export class ValidationEngine {
     private readonly enabledPluginIds: string[]
   ) {}
 
-  public async execute(): Promise<ValidationExecutionResult[]> {
+  public async execute(executionId: string = randomUUID()): Promise<ValidationExecutionResult[]> {
     this.logger.info("Validation started.");
 
     try {
-      const context = { executionId: randomUUID() };
+      const context = { executionId };
       const results = await Promise.all(
         this.enabledPluginIds.map((pluginId) => this.pluginRegistry.resolve(pluginId).execute(context))
       );

@@ -25,7 +25,7 @@ export class DefaultReferenceServiceFactory implements ReferenceServiceFactory {
       ...this.figmaConfiguration,
       fileKey: request.reference.fileKey,
       nodeId: request.reference.nodeId,
-      name: request.pageId
+      name: request.pageId,
     });
 
     return new ReferenceService(provider, this.storage, this.referenceConfiguration);

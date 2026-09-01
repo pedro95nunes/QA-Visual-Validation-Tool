@@ -6,7 +6,6 @@ import { Browser } from "../../core/interfaces/browser";
 import { ScreenshotService } from "../../core/interfaces/screenshot-service";
 import { Storage } from "../../core/interfaces/storage";
 import { Evidence } from "../../core/models/evidence";
-import { ScreenshotFormat } from "../../core/models/screenshot-format";
 import { readPngDimensions } from "../../utils/read-png-dimensions";
 
 /** Captures browser evidence and persists it through the Storage boundary. */
@@ -21,7 +20,7 @@ export class PlaywrightScreenshotService implements ScreenshotService {
     try {
       const content = await this.browser.captureScreenshot({
         fullPage: this.configuration.fullPage,
-        format: this.configuration.imageFormat
+        format: this.configuration.imageFormat,
       });
       const dimensions = readPngDimensions(content);
       const id = randomUUID();
@@ -40,8 +39,8 @@ export class PlaywrightScreenshotService implements ScreenshotService {
         height: dimensions.height,
         metadata: {
           fullPage: String(this.configuration.fullPage),
-          imageFormat: this.configuration.imageFormat
-        }
+          imageFormat: this.configuration.imageFormat,
+        },
       };
     } catch (error) {
       if (error instanceof EvidenceCaptureException) {

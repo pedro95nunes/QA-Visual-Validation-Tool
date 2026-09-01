@@ -10,7 +10,7 @@ const browserConfiguration: BrowserConfiguration = {
   headless: true,
   timeout: 30_000,
   viewport: { width: 1_440, height: 900 },
-  url: "https://example.test"
+  url: "https://example.test",
 };
 
 test("creates a Playwright browser for the Playwright provider", () => {
@@ -24,7 +24,7 @@ test("creates a Playwright browser for the Playwright provider", () => {
 test("rejects an unsupported browser provider", () => {
   const unsupportedConfiguration = {
     ...browserConfiguration,
-    provider: "unsupported"
+    provider: "unsupported",
   } as unknown as BrowserConfiguration;
   const factory = new DefaultBrowserFactory(unsupportedConfiguration);
 

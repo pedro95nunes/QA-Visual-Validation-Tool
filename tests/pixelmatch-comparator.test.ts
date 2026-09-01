@@ -20,6 +20,10 @@ class MemoryStorage implements Storage {
     this.content = content;
     return filePath;
   }
+
+  public async read(): Promise<Uint8Array> {
+    return this.content ?? new Uint8Array();
+  }
 }
 
 const comparisonConfiguration: ComparisonConfiguration = {
@@ -28,7 +32,7 @@ const comparisonConfiguration: ComparisonConfiguration = {
   allowedDifferencePercentage: 10,
   includeAA: false,
   alpha: 0.5,
-  outputDirectory: "artifacts/diffs"
+  outputDirectory: "artifacts/diffs",
 };
 
 test("passes identical PNG images without storing a diff", async () => {
@@ -60,7 +64,10 @@ test("stores a diff image and passes when differences are within the allowed per
 test("fails when differences exceed the allowed percentage", async () => {
   const strictConfiguration = { ...comparisonConfiguration, allowedDifferencePercentage: 1 };
   await withSinglePixelDifference(async (reference, evidence) => {
-    const result = await new PixelmatchComparator(new MemoryStorage(), strictConfiguration).compare(reference, evidence);
+    const result = await new PixelmatchComparator(new MemoryStorage(), strictConfiguration).compare(
+      reference,
+      evidence
+    );
 
     assert.equal(result.status, ComparisonStatus.Failed, JSON.stringify(result.metadata));
     assert.equal(result.passed, false);
@@ -161,7 +168,7 @@ function referenceFor(localPath: string): Reference {
     downloadedAt: new Date(),
     width: 4,
     height: 4,
-    metadata: {}
+    metadata: {},
   };
 }
 
@@ -173,6 +180,6 @@ function evidenceFor(filePath: string): Evidence {
     createdAt: new Date(),
     width: 4,
     height: 4,
-    metadata: {}
+    metadata: {},
   };
 }

@@ -14,7 +14,7 @@ class StaticDesignProvider implements DesignProvider {
       content: new Uint8Array([1, 2, 3]),
       width: 1_440,
       height: 900,
-      metadata: { imageFormat: "png" }
+      metadata: { imageFormat: "png" },
     };
   }
 
@@ -27,6 +27,10 @@ class MemoryStorage implements Storage {
   public async save(filePath: string, _content: Uint8Array): Promise<string> {
     this.savedPath = filePath;
     return filePath;
+  }
+
+  public async read(): Promise<Uint8Array> {
+    return new Uint8Array();
   }
 }
 
