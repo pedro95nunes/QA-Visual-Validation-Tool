@@ -2,9 +2,18 @@ name: Code Review
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
+
+# Cancel an in-flight review when the PR is pushed to again.
+concurrency:
+  group: code-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   review:
+    # Drafts are skipped by the plugin too, but this avoids spinning a runner.
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       pull-requests: write
@@ -12,10 +21,16 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: "https://github.com/anthropics/claude-code.git"
           plugins: "code-review@claude-code-plugins"
           prompt: "/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
-          claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment"'
+          # Grant exactly the tools /code-review declares it needs to read the PR
+          # and post the review. The old config only allowed the inline-comment
+          # tool, so the review could not run `gh pr diff/view` and posted nothing.
+          claude_args: >-
+            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr list:*),Bash(gh issue view:*),Bash(gh issue list:*),Bash(gh search:*),Bash(git blame:*),Bash(git log:*),Bash(git diff:*),mcp__github_inline_comment__create_inline_comment"
